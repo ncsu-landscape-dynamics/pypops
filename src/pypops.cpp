@@ -1,8 +1,15 @@
+#include <pops/raster.hpp>
+#include <pops/simulation.hpp>
+#include <pops/radial_kernel.hpp>
+
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/numpy.h>
 
-#include <pops/raster.hpp>
+#include <vector>
+#include <sstream>
+#include <typeinfo>
+#include <cstdint>
 
 namespace py = pybind11;
 using namespace pybind11::literals;
@@ -93,6 +100,58 @@ void raster_compatible_or_throw(const py::buffer_info& info)
         throw std::runtime_error("Incompatible order: expected row-major (C-style) order. Got " + to_string(info)); // TODO: tell if it is the F order
 }
 
+/*
+// This would be a way how to do handle py::buffer using constructors,
+// but since we are extensively relying on operators, making everything
+// work smoothly would require additional work.
+class IntegerRaster: public IntegerRasterX
+{
+public:
+    using IntegerRasterX::IntegerRasterX;
+    IntegerRaster() : IntegerRasterX() {}
+    IntegerRaster(py::buffer buffer)
+        :
+          IntegerRaster(buffer.request())
+    {}
+    IntegerRaster(py::buffer_info info)
+        :
+          IntegerRasterX(static_cast<Integer*>(info.ptr), info.shape[0], info.shape[1])
+    {
+        raster_compatible_or_throw<Integer>(info);
+    }
+};
+*/
+
+template<typename RasterType>
+RasterType py_buffer_info_to_raster(py::buffer b)
+{
+    typedef typename RasterType::NumberType NumberType;
+    py::buffer_info info = b.request();
+    raster_compatible_or_throw<NumberType>(info);
+    return RasterType(static_cast<NumberType*>(info.ptr), info.shape[0], info.shape[1]);
+}
+
+template<typename RasterType>
+py::buffer_info raster_to_py_buffer_info(RasterType& raster)
+{
+    typedef typename RasterType::NumberType NumberType;
+    return py::buffer_info(
+        // Pointer to buffer
+        raster.data(),
+        // Size of one scalar
+        sizeof(NumberType),
+        // Python struct-style format descriptor
+        py::format_descriptor<NumberType>::format(),
+        // Number of dimensions
+        2,
+        // Buffer dimensions
+        {raster.rows(), raster.cols()},
+        // Strides (in bytes) for each index, row-major order
+        {sizeof(NumberType) * raster.cols(),
+         sizeof(NumberType) * 1}
+    );
+}
+
 // We use template parameter instead of py::module to avoid this
 // implementation detail by duck typing.
 template<typename RasterType, typename PythonModule>
@@ -100,32 +159,15 @@ void raster_class(PythonModule& m, const std::string& name) {
     typedef typename RasterType::NumberType NumberType;
     py::class_<RasterType>(m, name.c_str(), py::buffer_protocol())
             .def(py::init([](py::buffer b) {
-                     py::buffer_info info = b.request();
-                     raster_compatible_or_throw<NumberType>(info);
-                     return new RasterType(static_cast<NumberType*>(info.ptr), info.shape[0], info.shape[1]);
+                     return py_buffer_info_to_raster<RasterType>(b);
                      // return by raw pointer
                      // or: return std::make_unique<Foo>(...); // return by holder
                      // or: return Foo(...); // return by value (move constructor)
                  }))
 
             .def_buffer(
-                [](RasterType& raster) -> py::buffer_info {
-                    return py::buffer_info(
-                        // Pointer to buffer
-                        raster.data(),
-                        // Size of one scalar
-                        sizeof(NumberType),
-                        // Python struct-style format descriptor
-                        py::format_descriptor<NumberType>::format(),
-                        // Number of dimensions
-                        2,
-                        // Buffer dimensions
-                        {raster.rows(), raster.cols()},
-                        // Strides (in bytes) for each index, row-major order
-                        {sizeof(NumberType) * raster.cols(),
-                         sizeof(NumberType) * 1}
-                    );
-            });
+                raster_to_py_buffer_info<RasterType>
+                );
 }
 
 template<typename NumberType, typename PythonModule>
@@ -179,6 +221,136 @@ py::object get_integer_raster_scalar_type()
     // return None or throw;
 }
 
+void modify_existing_raster(FloatRaster raster, Float x)
+{
+    raster += x;
+}
+
+void modify_existing_raster(IntegerRaster raster, Integer x)
+{
+    raster += x;
+}
+
+FloatRaster return_new_raster(double start_number)
+{
+    FloatRaster raster = {
+        {start_number + 11, start_number + 12, start_number + 1.3},
+        {start_number + 21, start_number + 22, start_number + 2.3},
+    };
+    return raster;
+}
+
+struct Result
+{
+    //IntegerRaster infected;
+    //IntegerRaster susceptible;
+    std::vector<std::tuple<int, int>> outside_dispersers;
+};
+
+// TODO: an output type seems to be reasonable
+// or a higher level object for the model/simulation
+// or the customizable output functions will take care of it by a custom
+// context which can be these vectors or write functions
+Result test_simulation(
+        int random_seed,
+        //bool use_lethal_temperature,
+        //double lethal_temperature,
+        IntegerRaster infected,
+        IntegerRaster susceptible,
+        IntegerRaster total_plants,
+        IntegerRaster mortality_tracker,
+        bool weather,
+        //std::vector<FloatRaster> temperature,
+        //std::vector<FloatRaster> weather_coefficient,
+        FloatRaster weather_coefficient,
+        double ew_res,
+        double ns_res,
+        double reproductive_rate
+        //std::string natural_kernel_type
+        // double natural_distance_scale
+        )
+{
+    double natural_distance_scale = 42;
+    // TODO: implement in PoPS or or put back to simulation here
+    IntegerRaster dispersers(infected.rows(), infected.cols(), 0);
+    std::vector<std::tuple<int, int>> outside_dispersers;
+    //DispersalKernelType dispersal_kernel = kernel_type_from_string(natural_kernel_type);
+    DispersalKernelType dispersal_kernel = kernel_type_from_string("cauchy");
+    Simulation<IntegerRaster, FloatRaster> simulation(random_seed, infected, dispersers);
+//    /*if (use_lethal_temperature)
+//        simulation.remove(infected, susceptible, temperature[0], lethal_temperature);*/
+    simulation.generate(infected, weather, weather_coefficient, reproductive_rate);
+    RadialDispersalKernel kernel(ew_res, ns_res, dispersal_kernel,
+                                 natural_distance_scale);
+    simulation.disperse(susceptible, infected,
+                        mortality_tracker, total_plants,
+                        outside_dispersers, weather, weather_coefficient,
+                        kernel);
+    return {outside_dispersers};
+}
+
+// TODO: an output type seems to be reasonable
+// or a higher level object for the model/simulation
+// or the customizable output functions will take care of it by a custom
+// context which can be these vectors or write functions
+Result test_simulation_wrapper(
+        int random_seed,
+        //bool use_lethal_temperature,
+        //double lethal_temperature,
+        py::buffer infected,
+        py::buffer susceptible,
+        py::buffer total_plants,
+        py::buffer mortality_tracker,
+        bool weather,
+        //std::vector<FloatRaster> temperature,
+        //std::vector<FloatRaster> weather_coefficient,
+        py::buffer weather_coefficient,
+        double ew_res,
+        double ns_res,
+        double reproductive_rate
+        //std::string natural_kernel_type
+        // double natural_distance_scale
+        )
+{
+    return test_simulation(
+                random_seed,
+                py_buffer_info_to_raster<IntegerRaster>(infected),
+                py_buffer_info_to_raster<IntegerRaster>(susceptible),
+                py_buffer_info_to_raster<IntegerRaster>(total_plants),
+                py_buffer_info_to_raster<IntegerRaster>(mortality_tracker),
+                weather,
+                py_buffer_info_to_raster<FloatRaster>(weather_coefficient),
+                ew_res,
+                ns_res,
+                reproductive_rate
+            );
+}
+
+// TODO: an output type seems to be reasonable
+// or a higher level object for the model/simulation
+// or the customizable output functions will take care of it by a custom
+// context which can be these vectors or write functions
+IntegerRaster test_simulation2(
+    IntegerRaster infected
+)
+{
+    infected(1, 1) = 200;
+    auto result = 5 * infected;
+    return result;
+}
+
+IntegerRaster test_simulation2_buffer_wrapper(py::buffer b) {
+    py::buffer_info info = b.request();
+    if (info.format == py::format_descriptor<Integer>::format() && info.itemsize == sizeof(Integer)) {
+        raster_compatible_or_throw<Integer>(info);
+        return test_simulation2(IntegerRaster(static_cast<Integer*>(info.ptr), info.shape[0], info.shape[1]));
+    }
+    else {
+        // throw
+        raster_compatible_or_throw<Float>(info);
+    }
+}
+
 PYBIND11_MODULE(pypops, m) {
     m.doc() = "Test of pybind11 with PoPS";
 
@@ -205,4 +377,53 @@ PYBIND11_MODULE(pypops, m) {
     test_compatibility<long>(m, "test_compatibility_long");
     // pypops.test_compatibility_long(np.array([[2,1,0], [4,6,7]], dtype=np.long))
     // expected q, got l (both have 8 bytes, using C++ type with id: l)
+
+    m.def("return_new_raster",
+          &return_new_raster,
+          "start_number"_a);
+
+    m.def("modify_existing_raster",
+          [](py::buffer b, Float x) {
+        // we convert Float scalar to Integer when needed
+        py::buffer_info info = b.request();
+        if (info.format == py::format_descriptor<Float>::format() && info.itemsize == sizeof(Float)) {
+            raster_compatible_or_throw<Float>(info);
+            modify_existing_raster(FloatRaster(static_cast<Float*>(info.ptr), info.shape[0], info.shape[1]), x);
+        } else if (info.format == py::format_descriptor<Integer>::format() && info.itemsize == sizeof(Integer)) {
+            raster_compatible_or_throw<Integer>(info);
+            modify_existing_raster(IntegerRaster(static_cast<Integer*>(info.ptr), info.shape[0], info.shape[1]), Integer(x));
+        } else {
+            // throw
+            raster_compatible_or_throw<Float>(info);
+        }
+    });
+
+    py::class_<Result>(m, "Result")
+             //.def_readonly("infected", &Result::infected)
+             //.def_readonly("susceptible", &Result::susceptible)
+             .def_readonly("outside_dispersers", &Result::outside_dispersers)
+            ;
+
+     m.def("test_simulation",
+           &test_simulation_wrapper,
+           "random_seed"_a,
+           // "use_lethal_temperature"_a,
+           // "lethal_temperature"_a,
+           "infected"_a,
+           "susceptible"_a,
+           "total_plants"_a,
+           "mortality_tracker"_a,
+           //"dispersers"_a,
+           "weather"_a,
+           // "temperature"_a,
+           "weather_coefficient"_a,
+           "ew_res"_a,
+           "ns_res"_a,
+           "reproductive_rate"_a
+           //"natural_kernel_type"_a = "cauchy",
+           //"natural_distance_scale"_a = 21
+           );
+
+     m.def("test_simulation2",
+           &test_simulation2_buffer_wrapper);
 }
