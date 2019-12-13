@@ -33,3 +33,10 @@ build
 *.exe
 *.out
 *.app
+
+# QtCreator files
+*.config
+*.creator
+*.files
+*.includes
+*.user
