@@ -131,6 +131,18 @@ RasterType py_buffer_info_to_raster(py::buffer b)
     return RasterType(static_cast<NumberType*>(info.ptr), info.shape[0], info.shape[1]);
 }
 
+// TODO: The return from function does not work, so unused for now.
+// Perhaps a 3D array will be needed for interface anyway.
+template<typename RasterType>
+std::vector<RasterType> py_buffers_info_to_rasters(std::vector<py::buffer>& buffers)
+{
+    std::vector<RasterType> rasters;
+    rasters.reserve(buffers.size());
+    for (auto buffer : buffers) {
+        rasters.emplace_back(py_buffer_info_to_raster<RasterType>(buffer));
+    }
+}
+
 template<typename RasterType>
 py::buffer_info raster_to_py_buffer_info(RasterType& raster)
 {
@@ -261,8 +273,8 @@ Result test_simulation(
         IntegerRaster mortality_tracker,
         bool weather,
         //std::vector<FloatRaster> temperature,
-        //std::vector<FloatRaster> weather_coefficient,
-        FloatRaster weather_coefficient,
+        std::vector<FloatRaster> weather_coefficient,
+        //FloatRaster weather_coefficient,
         double ew_res,
         double ns_res,
         double reproductive_rate
@@ -279,12 +291,12 @@ Result test_simulation(
     Simulation<IntegerRaster, FloatRaster> simulation(random_seed, infected, dispersers);
 //    /*if (use_lethal_temperature)
 //        simulation.remove(infected, susceptible, temperature[0], lethal_temperature);*/
-    simulation.generate(infected, weather, weather_coefficient, reproductive_rate);
+    simulation.generate(infected, weather, weather_coefficient[0], reproductive_rate);
     RadialDispersalKernel kernel(ew_res, ns_res, dispersal_kernel,
                                  natural_distance_scale);
     simulation.disperse(susceptible, infected,
                         mortality_tracker, total_plants,
-                        outside_dispersers, weather, weather_coefficient,
+                        outside_dispersers, weather, weather_coefficient[0],
                         kernel);
     return {outside_dispersers};
 }
@@ -303,8 +315,8 @@ Result test_simulation_wrapper(
         py::buffer mortality_tracker,
         bool weather,
         //std::vector<FloatRaster> temperature,
-        //std::vector<FloatRaster> weather_coefficient,
-        py::buffer weather_coefficient,
+        std::vector<py::buffer> weather_coefficient,
+        //py::buffer weather_coefficient,
         double ew_res,
         double ns_res,
         double reproductive_rate
@@ -312,6 +324,12 @@ Result test_simulation_wrapper(
         // double natural_distance_scale
         )
 {
+    std::vector<FloatRaster> rasters;
+    rasters.reserve(weather_coefficient.size());
+    for (auto buffer : weather_coefficient) {
+        rasters.emplace_back(py_buffer_info_to_raster<FloatRaster>(buffer));
+    }
+
     return test_simulation(
                 random_seed,
                 py_buffer_info_to_raster<IntegerRaster>(infected),
@@ -319,7 +337,9 @@ Result test_simulation_wrapper(
                 py_buffer_info_to_raster<IntegerRaster>(total_plants),
                 py_buffer_info_to_raster<IntegerRaster>(mortality_tracker),
                 weather,
-                py_buffer_info_to_raster<FloatRaster>(weather_coefficient),
+//                py_buffers_info_to_rasters<FloatRaster>(weather_coefficient),
+    //{py_buffer_info_to_raster<FloatRaster>(weather_coefficient[0])},
+                rasters,
                 ew_res,
                 ns_res,
                 reproductive_rate
