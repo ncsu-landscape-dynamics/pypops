@@ -141,6 +141,7 @@ std::vector<RasterType> py_buffers_info_to_rasters(std::vector<py::buffer>& buff
     for (auto buffer : buffers) {
         rasters.emplace_back(py_buffer_info_to_raster<RasterType>(buffer));
     }
+    return rasters;
 }
 
 template<typename RasterType>
@@ -168,7 +169,6 @@ py::buffer_info raster_to_py_buffer_info(RasterType& raster)
 // implementation detail by duck typing.
 template<typename RasterType, typename PythonModule>
 void raster_class(PythonModule& m, const std::string& name) {
-    typedef typename RasterType::NumberType NumberType;
     py::class_<RasterType>(m, name.c_str(), py::buffer_protocol())
             .def(py::init([](py::buffer b) {
                      return py_buffer_info_to_raster<RasterType>(b);
@@ -213,7 +213,7 @@ py::object get_float_raster_scalar_type()
         if (sizeof(Float) == py::int_(candidate.attr("itemsize")))
             return candidate;
     }
-    // return None or throw;
+    throw std::logic_error("Cannot find a compatible scalar type");
 }
 
 py::object get_integer_raster_scalar_type()
@@ -230,7 +230,7 @@ py::object get_integer_raster_scalar_type()
         if (sizeof(Integer) == py::int_(candidate.attr("itemsize")))
             return candidate;
     }
-    // return None or throw;
+    throw std::logic_error("Cannot find a compatible scalar type");
 }
 
 void modify_existing_raster(FloatRaster raster, Float x)
@@ -365,10 +365,8 @@ IntegerRaster test_simulation2_buffer_wrapper(py::buffer b) {
         raster_compatible_or_throw<Integer>(info);
         return test_simulation2(IntegerRaster(static_cast<Integer*>(info.ptr), info.shape[0], info.shape[1]));
     }
-    else {
-        // throw
-        raster_compatible_or_throw<Float>(info);
-    }
+    raster_compatible_or_throw<Integer>(info);
+    throw std::logic_error("Raster-array scalar type incompatibility not identified");
 }
 
 PYBIND11_MODULE(pypops, m) {

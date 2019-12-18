@@ -16,6 +16,13 @@ pybind11_add_module(pypops src/pypops.cpp)
 
 target_link_libraries(pypops PRIVATE pops)
 
+if(MSVC)
+  target_compile_options(pypops PRIVATE /W4 /WX)
+else()
+  target_compile_options(pypops PRIVATE -Wall -Wextra -pedantic -Werror)
+endif()
+
+
 # Testing only available if this is the main app
 #if((CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME) AND BUILD_TESTING)
     #add_subdirectory(tests)
