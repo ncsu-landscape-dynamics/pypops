@@ -324,12 +324,6 @@ Result test_simulation_wrapper(
         // double natural_distance_scale
         )
 {
-    std::vector<FloatRaster> rasters;
-    rasters.reserve(weather_coefficient.size());
-    for (auto buffer : weather_coefficient) {
-        rasters.emplace_back(py_buffer_info_to_raster<FloatRaster>(buffer));
-    }
-
     return test_simulation(
                 random_seed,
                 py_buffer_info_to_raster<IntegerRaster>(infected),
@@ -337,9 +331,7 @@ Result test_simulation_wrapper(
                 py_buffer_info_to_raster<IntegerRaster>(total_plants),
                 py_buffer_info_to_raster<IntegerRaster>(mortality_tracker),
                 weather,
-//                py_buffers_info_to_rasters<FloatRaster>(weather_coefficient),
-    //{py_buffer_info_to_raster<FloatRaster>(weather_coefficient[0])},
-                rasters,
+                py_buffers_info_to_rasters<FloatRaster>(weather_coefficient),
                 ew_res,
                 ns_res,
                 reproductive_rate

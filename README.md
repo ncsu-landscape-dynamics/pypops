@@ -64,6 +64,19 @@ Currently, this repository needs uses `cmake-build` branch from the PoPS
 repository and the following changes.
 
 ```
+diff --git a/include/pops/raster.hpp b/include/pops/raster.hpp
+index bf76726..636d05f 100644
+--- a/include/pops/raster.hpp
++++ b/include/pops/raster.hpp
+@@ -130,7 +130,7 @@ public:
+     }
+
+     Raster(Raster&& other)
+-        : owns_(true)
++        : owns_(other.owns_)
+     {
+         cols_ = other.cols_;
+         rows_ = other.rows_;
 diff --git a/include/pops/simulation.hpp b/include/pops/simulation.hpp
 index ceadc95..6a21fd8 100644
 --- a/include/pops/simulation.hpp
