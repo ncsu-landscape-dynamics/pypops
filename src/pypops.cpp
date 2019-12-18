@@ -139,7 +139,7 @@ std::vector<RasterType> py_buffers_info_to_rasters(std::vector<py::buffer>& buff
     std::vector<RasterType> rasters;
     rasters.reserve(buffers.size());
     for (auto buffer : buffers) {
-        rasters.emplace_back(py_buffer_info_to_raster<RasterType>(buffer));
+        rasters.push_back(py_buffer_info_to_raster<RasterType>(buffer));
     }
     return rasters;
 }
