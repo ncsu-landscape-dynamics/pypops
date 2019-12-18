@@ -46,6 +46,18 @@ This adds the library on the path and also ensures that you are in the
 current `build` directly in case you recreated the directory in the mean
 time (see `rm` step above).
 
+Run it with Valgrind:
+
+```
+PYTHONPATH="." valgrind python3 ../tests/test_simulation_function.py
+```
+
+Run it with GDB:
+
+```
+PYTHONPATH="." gdb -ex=run --args python3 ../tests/test_simulation_function.py
+```
+
 ## Version of PoPS C++ used
 
 Currently, this repository needs uses `cmake-build` branch from the PoPS
