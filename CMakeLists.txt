@@ -12,7 +12,9 @@ project(PyPoPS
 add_subdirectory(pybind11)
 add_subdirectory(PoPS)
 
-pybind11_add_module(pypops src/pypops.cpp)
+pybind11_add_module(pypops src/pypops.cpp include/raster.hpp include/helpers.hpp)
+
+target_include_directories(pypops PRIVATE include)
 
 target_link_libraries(pypops PRIVATE pops)
 
