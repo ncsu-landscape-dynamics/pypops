@@ -1,0 +1,21 @@
+name: C++ CMake CI
+
+on: [push]
+
+jobs:
+  build-ubuntu:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python
+      uses: actions/setup-python@v1
+      with:
+        python-version: '3.x'
+    - name: configure
+      run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+    - name: build
+      run: cmake --build build
+    - name: test
+      run: env CTEST_OUTPUT_ON_FAILURE=1 cmake --build build --target test
