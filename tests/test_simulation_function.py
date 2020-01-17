@@ -14,6 +14,7 @@ weather_coefficient = np.matrix("0.6 0.8 0.7; 0.2 0.8 0.5", dtype=float_type)
 
 a = pypops.test_simulation(
     random_seed=42,
+    steps=2,
     use_lethal_temperature=False,
     lethal_temperature=-1.5,
     infected=infected,
@@ -22,17 +23,25 @@ a = pypops.test_simulation(
     mortality_tracker=mortality_tracker,
     #dispersers=dispersers,
     weather=True,
-    temperature=[temperature],
-    weather_coefficient=[weather_coefficient],
+    temperature=[temperature, temperature],
+    weather_coefficient=[weather_coefficient, weather_coefficient],
     #weather_coefficient=weather_coefficient,
     ew_res=100.,
     ns_res=100.,
     reproductive_rate=400.4,
     natural_kernel_type="cauchy",
-    natural_distance_scale=20
+    natural_scale=20,
+    natural_direction="none",
+    natural_kappa=0,
+    use_anthropogenic_kernel=False,
+    percent_natural_dispersal=0,
+    anthro_kernel_type="cauchy",
+    anthro_scale=0,
+    anthro_direction="none",
+    anthro_kappa=0
     )
 
 print(a)
 #print(a.infected)
-print(a.outside_dispersers)
+print(len(a.outside_dispersers))
 print(mortality_tracker)

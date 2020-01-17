@@ -2,7 +2,7 @@
 #include "helpers.hpp"
 
 #include <pops/simulation.hpp>
-#include <pops/radial_kernel.hpp>
+#include <pops/kernel.hpp>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -50,6 +50,7 @@ struct Result
 // context which can be these vectors or write functions
 Result test_simulation(
         int random_seed,
+        int steps,
         bool use_lethal_temperature,
         double lethal_temperature,
         IntegerRaster infected,
@@ -59,28 +60,62 @@ Result test_simulation(
         bool weather,
         std::vector<FloatRaster> temperature,
         std::vector<FloatRaster> weather_coefficient,
-        //FloatRaster weather_coefficient,
         double ew_res,
         double ns_res,
         double reproductive_rate,
         std::string natural_kernel_type,
-        double natural_distance_scale
+        double natural_scale,
+        std::string natural_direction,
+        double natural_kappa,
+        bool use_anthropogenic_kernel,
+        double percent_natural_dispersal,
+        std::string anthro_kernel_type,
+        double anthro_scale,
+        std::string anthro_direction,
+        double anthro_kappa
         )
 {
     // TODO: implement in PoPS or or put back to simulation here
     IntegerRaster dispersers(infected.rows(), infected.cols(), 0);
     std::vector<std::tuple<int, int>> outside_dispersers;
-    DispersalKernelType dispersal_kernel = kernel_type_from_string(natural_kernel_type);
-    Simulation<IntegerRaster, FloatRaster> simulation(random_seed, infected, dispersers);
-    if (use_lethal_temperature)
-        simulation.remove(infected, susceptible, temperature[0], lethal_temperature);
-    simulation.generate(infected, weather, weather_coefficient[0], reproductive_rate);
-    RadialDispersalKernel kernel(ew_res, ns_res, dispersal_kernel,
-                                 natural_distance_scale);
-    simulation.disperse(susceptible, infected,
-                        mortality_tracker, total_plants,
-                        outside_dispersers, weather, weather_coefficient[0],
-                        kernel);
+
+    DispersalKernelType natural_kernel = kernel_type_from_string(natural_kernel_type);
+    DispersalKernelType anthro_kernel = kernel_type_from_string(anthro_kernel_type);
+
+    RadialDispersalKernel natural_radial_kernel(
+                ew_res, ns_res,
+                natural_kernel,
+                natural_scale,
+                direction_from_string(natural_direction),
+                natural_kappa);
+    RadialDispersalKernel long_radial_kernel(
+                ew_res, ns_res,
+                anthro_kernel,
+                anthro_scale,
+                direction_from_string(anthro_direction),
+                anthro_kappa);
+    UniformDispersalKernel uniform_kernel(infected.rows(), infected.cols());
+    SwitchDispersalKernel natural_selectable_kernel(
+                natural_kernel,
+                natural_radial_kernel, uniform_kernel);
+    SwitchDispersalKernel anthro_selectable_kernel(
+                    anthro_kernel,
+                    long_radial_kernel, uniform_kernel);
+    DispersalKernel dispersal_kernel(natural_selectable_kernel,
+                                     anthro_selectable_kernel,
+                                     use_anthropogenic_kernel,
+                                     percent_natural_dispersal);
+
+    Simulation<IntegerRaster, FloatRaster> simulation(random_seed, infected.rows(), infected.cols());
+    for (int step = 0; step < steps; ++step) {
+        if (use_lethal_temperature)
+            simulation.remove(infected, susceptible, temperature[step], lethal_temperature);
+        simulation.generate(dispersers, infected, weather, weather_coefficient[step], reproductive_rate);
+        simulation.disperse(dispersers, susceptible, infected,
+                            mortality_tracker, total_plants,
+                            outside_dispersers, weather, weather_coefficient[step],
+                natural_selectable_kernel);
+    }
     return {outside_dispersers};
 }
 
@@ -90,6 +125,7 @@ Result test_simulation(
 // context which can be these vectors or write functions
 Result test_simulation_wrapper(
         int random_seed,
+        int steps,
         bool use_lethal_temperature,
         double lethal_temperature,
         py::buffer infected,
@@ -99,16 +135,24 @@ Result test_simulation_wrapper(
         bool weather,
         std::vector<py::buffer> temperature,
         std::vector<py::buffer> weather_coefficient,
-        //py::buffer weather_coefficient,
         double ew_res,
         double ns_res,
         double reproductive_rate,
         std::string natural_kernel_type,
-        double natural_distance_scale
+        double natural_scale,
+        std::string natural_direction,
+        double natural_kappa,
+        bool use_anthropogenic_kernel,
+        double percent_natural_dispersal,
+        std::string anthro_kernel_type,
+        double anthro_scale,
+        std::string anthro_direction,
+        double anthro_kappa
         )
 {
     return test_simulation(
                 random_seed,
+                steps,
                 use_lethal_temperature,
                 lethal_temperature,
                 py_buffer_info_to_raster<IntegerRaster>(infected),
@@ -122,7 +166,15 @@ Result test_simulation_wrapper(
                 ns_res,
                 reproductive_rate,
                 natural_kernel_type,
-                natural_distance_scale
+                natural_scale,
+                natural_direction,
+                natural_kappa,
+                use_anthropogenic_kernel,
+                percent_natural_dispersal,
+                anthro_kernel_type,
+                anthro_scale,
+                anthro_direction,
+                anthro_kappa
             );
 }
 
@@ -202,25 +254,35 @@ PYBIND11_MODULE(pypops, m) {
              .def_readonly("outside_dispersers", &Result::outside_dispersers)
             ;
 
-     m.def("test_simulation",
-           &test_simulation_wrapper,
-           "random_seed"_a,
-           "use_lethal_temperature"_a,
-           "lethal_temperature"_a,
-           "infected"_a,
-           "susceptible"_a,
-           "total_plants"_a,
-           "mortality_tracker"_a,
-           //"dispersers"_a,
-           "weather"_a,
-           "temperature"_a,
-           "weather_coefficient"_a,
-           "ew_res"_a,
-           "ns_res"_a,
-           "reproductive_rate"_a,
-           "natural_kernel_type"_a = "cauchy",
-           "natural_distance_scale"_a = 21
-           );
+    // Tip: if you get "number of annotations does not match"
+    // but parameters seems to be right, check the commas.
+    m.def("test_simulation",
+          &test_simulation_wrapper,
+          "random_seed"_a,
+          "steps"_a,
+          "use_lethal_temperature"_a,
+          "lethal_temperature"_a,
+          "infected"_a,
+          "susceptible"_a,
+          "total_plants"_a,
+          "mortality_tracker"_a,
+          "weather"_a,
+          "temperature"_a,
+          "weather_coefficient"_a,
+          "ew_res"_a,
+          "ns_res"_a,
+          "reproductive_rate"_a,
+          "natural_kernel_type"_a,
+          "natural_scale"_a,
+          "natural_direction"_a,
+          "natural_kappa"_a,
+          "use_anthropogenic_kernel"_a,
+          "percent_natural_dispersal"_a,
+          "anthro_kernel_type"_a,
+          "anthro_scale"_a,
+          "anthro_direction"_a,
+          "anthro_kappa"_a
+          );
 
      m.def("test_simulation2",
            &test_simulation2_buffer_wrapper);
