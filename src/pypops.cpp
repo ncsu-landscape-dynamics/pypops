@@ -50,32 +50,30 @@ struct Result
 // context which can be these vectors or write functions
 Result test_simulation(
         int random_seed,
-        //bool use_lethal_temperature,
-        //double lethal_temperature,
+        bool use_lethal_temperature,
+        double lethal_temperature,
         IntegerRaster infected,
         IntegerRaster susceptible,
         IntegerRaster total_plants,
         IntegerRaster mortality_tracker,
         bool weather,
-        //std::vector<FloatRaster> temperature,
+        std::vector<FloatRaster> temperature,
         std::vector<FloatRaster> weather_coefficient,
         //FloatRaster weather_coefficient,
         double ew_res,
         double ns_res,
-        double reproductive_rate
-        //std::string natural_kernel_type
-        // double natural_distance_scale
+        double reproductive_rate,
+        std::string natural_kernel_type,
+        double natural_distance_scale
         )
 {
-    double natural_distance_scale = 42;
     // TODO: implement in PoPS or or put back to simulation here
     IntegerRaster dispersers(infected.rows(), infected.cols(), 0);
     std::vector<std::tuple<int, int>> outside_dispersers;
-    //DispersalKernelType dispersal_kernel = kernel_type_from_string(natural_kernel_type);
-    DispersalKernelType dispersal_kernel = kernel_type_from_string("cauchy");
+    DispersalKernelType dispersal_kernel = kernel_type_from_string(natural_kernel_type);
     Simulation<IntegerRaster, FloatRaster> simulation(random_seed, infected, dispersers);
-//    /*if (use_lethal_temperature)
-//        simulation.remove(infected, susceptible, temperature[0], lethal_temperature);*/
+    if (use_lethal_temperature)
+        simulation.remove(infected, susceptible, temperature[0], lethal_temperature);
     simulation.generate(infected, weather, weather_coefficient[0], reproductive_rate);
     RadialDispersalKernel kernel(ew_res, ns_res, dispersal_kernel,
                                  natural_distance_scale);
@@ -92,34 +90,39 @@ Result test_simulation(
 // context which can be these vectors or write functions
 Result test_simulation_wrapper(
         int random_seed,
-        //bool use_lethal_temperature,
-        //double lethal_temperature,
+        bool use_lethal_temperature,
+        double lethal_temperature,
         py::buffer infected,
         py::buffer susceptible,
         py::buffer total_plants,
         py::buffer mortality_tracker,
         bool weather,
-        //std::vector<FloatRaster> temperature,
+        std::vector<py::buffer> temperature,
         std::vector<py::buffer> weather_coefficient,
         //py::buffer weather_coefficient,
         double ew_res,
         double ns_res,
-        double reproductive_rate
-        //std::string natural_kernel_type
-        // double natural_distance_scale
+        double reproductive_rate,
+        std::string natural_kernel_type,
+        double natural_distance_scale
         )
 {
     return test_simulation(
                 random_seed,
+                use_lethal_temperature,
+                lethal_temperature,
                 py_buffer_info_to_raster<IntegerRaster>(infected),
                 py_buffer_info_to_raster<IntegerRaster>(susceptible),
                 py_buffer_info_to_raster<IntegerRaster>(total_plants),
                 py_buffer_info_to_raster<IntegerRaster>(mortality_tracker),
                 weather,
+                py_buffers_info_to_rasters<FloatRaster>(temperature),
                 py_buffers_info_to_rasters<FloatRaster>(weather_coefficient),
                 ew_res,
                 ns_res,
-                reproductive_rate
+                reproductive_rate,
+                natural_kernel_type,
+                natural_distance_scale
             );
 }
 
@@ -202,21 +205,21 @@ PYBIND11_MODULE(pypops, m) {
      m.def("test_simulation",
            &test_simulation_wrapper,
            "random_seed"_a,
-           // "use_lethal_temperature"_a,
-           // "lethal_temperature"_a,
+           "use_lethal_temperature"_a,
+           "lethal_temperature"_a,
            "infected"_a,
            "susceptible"_a,
            "total_plants"_a,
            "mortality_tracker"_a,
            //"dispersers"_a,
            "weather"_a,
-           // "temperature"_a,
+           "temperature"_a,
            "weather_coefficient"_a,
            "ew_res"_a,
            "ns_res"_a,
-           "reproductive_rate"_a
-           //"natural_kernel_type"_a = "cauchy",
-           //"natural_distance_scale"_a = 21
+           "reproductive_rate"_a,
+           "natural_kernel_type"_a = "cauchy",
+           "natural_distance_scale"_a = 21
            );
 
      m.def("test_simulation2",
