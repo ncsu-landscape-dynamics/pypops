@@ -1,6 +1,6 @@
 # pypops
 
-[![Actions Status](https://github.com/ncsu-landscape-dynamics/pypops/workflows/cpp/badge.svg)](https://github.com/ncsu-landscape-dynamics/pypops/actions)
+[![Actions Status](https://github.com/ncsu-landscape-dynamics/pypops/workflows/C%2B%2B%20CMake%20CI%20with%20Python/badge.svg)](https://github.com/ncsu-landscape-dynamics/pypops/actions)
 
 PoPS (Pest or Pathogen Spread) Model Python Interface
 
