@@ -13,11 +13,11 @@ total_plants = np.matrix("15 6 20; 14 15 25", dtype=int_type)
 weather_coefficient = np.matrix("0.6 0.8 0.7; 0.2 0.8 0.5", dtype=float_type)
 
 
-def test_simulation2_wrapper(infected):
+def simulation2_wrapper(infected):
     b = pypops.test_simulation2(infected)
     result = np.matrix(b, copy=False)
     return result
 
-result = test_simulation2_wrapper(infected)
+result = simulation2_wrapper(infected)
 print(infected)
 print(result)
