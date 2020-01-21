@@ -5,7 +5,70 @@
 
 PoPS (Pest or Pathogen Spread) Model Python Interface
 
-## Compile
+## Install using pip
+
+Here, we will use a Python virtual environment to separate the pypops package install
+from the rest of your system. First, create the environment:
+
+```
+python3 -m venv testvenv
+```
+
+Then, active the environment ([this will be different for different platfroms and shells](https://docs.python.org/3/library/venv.html)):
+
+```
+source bin/activate
+```
+
+Before using *pip*, upgrate it:
+
+```
+python -m pip install --upgrade pip
+```
+
+Install pypops from the GitHub repository:
+
+```
+pip install git+https://github.com/ncsu-landscape-dynamics/pypops
+```
+
+To install from previosly downloaded source code, just use path the source code instead of the URL.
+
+## Run tests using *pytest*
+
+In the virtual environment, install *pytest* using *pip*:
+
+```
+pip install pytest
+```
+
+Run the tests:
+
+```
+pytest tests/
+```
+
+### Test basic functionality in Python
+
+In the virtual environment, start Python:
+
+```
+python
+```
+
+In Python, import the package and try some basic functions:
+
+```
+>>> import pypops
+>>> pypops.get_float_raster_scalar_type()
+dtype('float64')
+>>> pypops.get_integer_raster_scalar_type()
+dtype('int32')
+```
+
+## Compile using CMake
+
+For development of pypops, you can use CMake build directly (skipping the installation with *pip*).
 
 Configure the project and use build directory for configure and build
 outputs:
@@ -36,9 +99,10 @@ Optionally, to remove the build directory when you are done, use:
 rm -rf build
 ```
 
-## Run Python code for testing separately
+## Run Python code for testing manually
 
-To run Python code from `tests` or any other script, use
+Assuming that you have a build from CMake, 
+to run Python code from `tests` or any other script, use
 in the `build` directory (assuming nested one under source tree):
 
 ```
