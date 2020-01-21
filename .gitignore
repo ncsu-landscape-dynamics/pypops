@@ -1,6 +1,9 @@
 # Common CMake build directory
 build
 
+# Python
+*.pyc
+
 # Prerequisites
 *.d
 
