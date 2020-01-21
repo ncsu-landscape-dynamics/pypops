@@ -20,23 +20,21 @@ d = np.array([[2,1,0],
 pypops.modify_existing_raster(d, 100)
 print(d)
 
-# the script ends here
-exit()
+# The script ends here.
+# All code below is expected to fail (and thus it is disabled).
 
-# all code below is expected to fail (and thus it is disabled)
+# f = np.array([[1.1, 2, 3],
+#               [4, 6, 7]], order='F')
+# pypops.modify_existing_raster(f, 100)
+# print(f)
 
-f = np.array([[1.1, 2, 3],
-              [4, 6, 7]], order='F')
-pypops.modify_existing_raster(f, 100)
-print(f)
-
-ff = np.array(np.array([1.1, 2, 3, 4, 5, 6]).reshape(1, 1, 6, order='F'), order='F')
-print(ff)
-pypops.modify_existing_raster(ff, 100)
-print(ff)
+# ff = np.array(np.array([1.1, 2, 3, 4, 5, 6]).reshape(1, 1, 6, order='F'), order='F')
+# print(ff)
+# pypops.modify_existing_raster(ff, 100)
+# print(ff)
 
 
-i = np.array([[1, 2, 3],
-              [4, 6, 7]])
-pypops.modify_existing_raster(i, 100)
-print(i)
+# i = np.array([[1, 2, 3],
+#               [4, 6, 7]])
+# pypops.modify_existing_raster(i, 100)
+# print(i)
