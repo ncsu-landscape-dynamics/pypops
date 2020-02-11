@@ -65,7 +65,8 @@ setup(
     author_email="wenzeslaus@gmail.com",
     description="PyPoPS - Pest or Pathogen Spread Model",
     long_description="Python interface to PoPS (Pest or Pathogen Spread) Model C++ library",
-    ext_modules=[CMakeExtension("pypops")],
+    packages=setuptools.find_packages(),
+    ext_modules=[CMakeExtension("_pypops")],
     cmdclass=dict(build_ext=CMakeBuild),
     zip_safe=False,
     install_requires=[

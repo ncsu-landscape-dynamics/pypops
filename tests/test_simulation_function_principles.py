@@ -1,5 +1,7 @@
 import numpy as np
-import pypops
+
+# we only test the C++ interface here
+import _pypops as pypops
 
 
 def test_simplified_simulation_function():

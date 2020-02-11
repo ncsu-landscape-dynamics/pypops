@@ -66,10 +66,10 @@ python
 In Python, import the package and try some basic functions:
 
 ```
->>> import pypops
->>> pypops.get_float_raster_scalar_type()
+>>> import _pypops
+>>> _pypops.get_float_raster_scalar_type()
 dtype('float64')
->>> pypops.get_integer_raster_scalar_type()
+>>> _pypops.get_integer_raster_scalar_type()
 dtype('int32')
 ```
 

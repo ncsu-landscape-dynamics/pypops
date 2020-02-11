@@ -200,8 +200,8 @@ IntegerRaster test_simulation2_buffer_wrapper(py::buffer b) {
     throw std::logic_error("Raster-array scalar type incompatibility not identified");
 }
 
-PYBIND11_MODULE(pypops, m) {
-    m.doc() = "Test of pybind11 with PoPS";
+PYBIND11_MODULE(_pypops, m) {
+    m.doc() = "C++ PoPS wrapper for PyPoPS";
 
     m.def("get_float_raster_scalar_type",
           &get_float_raster_scalar_type);

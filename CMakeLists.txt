@@ -12,16 +12,16 @@ project(PyPoPS
 add_subdirectory(pybind11)
 add_subdirectory(PoPS)
 
-pybind11_add_module(pypops src/pypops.cpp include/raster.hpp include/helpers.hpp)
+pybind11_add_module(_pypops src/pypops.cpp include/raster.hpp include/helpers.hpp)
 
-target_include_directories(pypops PRIVATE include)
+target_include_directories(_pypops PRIVATE include)
 
-target_link_libraries(pypops PRIVATE pops)
+target_link_libraries(_pypops PRIVATE pops)
 
 if(MSVC)
-  target_compile_options(pypops PRIVATE /W4 /WX)
+  target_compile_options(_pypops PRIVATE /W4 /WX)
 else()
-  target_compile_options(pypops PRIVATE -Wall -Wextra -pedantic -Werror)
+  target_compile_options(_pypops PRIVATE -Wall -Wextra -pedantic -Werror)
 endif()
 
 

@@ -1,12 +1,11 @@
 import numpy as np
 
-# we only test the C++ interface here
-import _pypops as pypops
+import _pypops
 
 
-def test_simulation_function():
-    int_type = pypops.get_integer_raster_scalar_type()
-    float_type = pypops.get_float_raster_scalar_type()
+def pops():
+    int_type = _pypops.get_integer_raster_scalar_type()
+    float_type = _pypops.get_float_raster_scalar_type()
 
     infected = np.array([[5, 0, 0],
                          [0, 0, 0]], dtype=np.int32)
@@ -22,7 +21,7 @@ def test_simulation_function():
     weather_coefficient = np.array([[0.6, 0.8, 0.7],
                                     [0.2, 0.8, 0.5]], dtype=float_type)
 
-    a = pypops.test_simulation(
+    a = _pypops.test_simulation(
         random_seed=42,
         steps=2,
         use_lethal_temperature=False,
@@ -50,12 +49,4 @@ def test_simulation_function():
         anthro_direction="none",
         anthro_kappa=0
         )
-
-    print(a)
-    # print(a.infected)
-    print(len(a.outside_dispersers))
-    print(mortality_tracker)
-
-
-if __name__ == "__main__":
-    test_simulation_function()
+    return a
