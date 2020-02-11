@@ -75,7 +75,6 @@ Result test_simulation(
         double anthro_kappa
         )
 {
-    // TODO: implement in PoPS or or put back to simulation here
     IntegerRaster dispersers(infected.rows(), infected.cols(), 0);
     std::vector<std::tuple<int, int>> outside_dispersers;
 
@@ -114,7 +113,7 @@ Result test_simulation(
         simulation.disperse(dispersers, susceptible, infected,
                             mortality_tracker, total_plants,
                             outside_dispersers, weather, weather_coefficient[step],
-                natural_selectable_kernel);
+                            dispersal_kernel);
     }
     return {outside_dispersers};
 }
