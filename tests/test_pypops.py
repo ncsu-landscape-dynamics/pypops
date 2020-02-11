@@ -5,8 +5,10 @@ import _pypops as pypops
 
 
 def test_compatibility_of_used_scalar_type():
-    a = np.matrix("5 0 0; 0 0 0")
-    b = np.matrix("0.6 0.8 0.7; 0.2 0.8 0.5")
+    a = np.array([[5, 0, 0],
+                  [0, 0, 0]])
+    b = np.array([[0.6, 0.8, 0.7],
+                  [0.2, 0.8, 0.5]])
 
     tf = pypops.get_float_raster_scalar_type()
     print("Type:", tf)
@@ -21,7 +23,7 @@ def test_compatibility_of_used_scalar_type():
     print(m)
     print(b)
 
-    a = np.matrix(a, dtype=ti)
+    a = np.array(a, dtype=ti)
 
     m = pypops.IntegerRaster(a)
     print(m)
