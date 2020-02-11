@@ -14,6 +14,12 @@ from the rest of your system. First, create the environment:
 python3 -m venv testvenv
 ```
 
+Enter the directory of virtual environment:
+
+```
+testvenv
+```
+
 Then, active the environment ([this will be different for different platfroms and shells](https://docs.python.org/3/library/venv.html)):
 
 ```
@@ -42,7 +48,8 @@ In the virtual environment, install *pytest* using *pip*:
 pip install pytest
 ```
 
-Run the tests:
+Assuming you are in the pypops project directory (e.g. your Git clone),
+run the tests:
 
 ```
 pytest tests/
@@ -103,26 +110,23 @@ rm -rf build
 
 Assuming that you have a build from CMake, 
 to run Python code from `tests` or any other script, use
-in the `build` directory (assuming nested one under source tree):
+in the `build` directory as `PYTHONPATH`
+(here, assuming nested `build` directory under the source tree):
 
 ```
-cd ../build/; PYTHONPATH="." python3 ../tests/test_pypops.py
+PYTHONPATH="build" python3 tests/test_pypops.py
 ```
-
-This adds the library on the path and also ensures that you are in the
-current `build` directly in case you recreated the directory in the mean
-time (see `rm` step above).
 
 Run it with Valgrind:
 
 ```
-PYTHONPATH="." valgrind python3 ../tests/test_simulation_function.py
+PYTHONPATH="build" valgrind python3 tests/test_simulation_function.py
 ```
 
 Run it with GDB:
 
 ```
-PYTHONPATH="." gdb -ex=run --args python3 ../tests/test_simulation_function.py
+PYTHONPATH="build" gdb -ex=run --args python3 tests/test_simulation_function.py
 ```
 
 ## Version of PoPS C++ used
