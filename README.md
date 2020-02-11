@@ -1,7 +1,7 @@
 # pypops
 
-[![Actions Status](https://github.com/ncsu-landscape-dynamics/pypops/workflows/C%2B%2B%20CMake%20CI%20with%20Python/badge.svg)](https://github.com/ncsu-landscape-dynamics/pypops/actions)
-[![Actions Status](https://github.com/ncsu-landscape-dynamics/pypops/workflows/Python%20package%20test%20build/badge.svg)](https://github.com/ncsu-landscape-dynamics/pypops/actions)
+[![Python package test build](https://github.com/ncsu-landscape-dynamics/pypops/workflows/C%2B%2B%20CMake%20CI%20with%20Python/badge.svg)](https://github.com/ncsu-landscape-dynamics/pypops/actions?query=workflow%3A%22C%2B%2B+CMake+CI+with+Python%22)
+[![C++ CMake CI with Python](https://github.com/ncsu-landscape-dynamics/pypops/workflows/Python%20package%20test%20build/badge.svg)](https://github.com/ncsu-landscape-dynamics/pypops/actions?query=workflow%3A%22Python+package+test+build%22)
 
 PoPS (Pest or Pathogen Spread) Model Python Interface
 
