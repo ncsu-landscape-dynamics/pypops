@@ -1,0 +1,23 @@
+name: Black code style check
+
+on: [push]
+
+jobs:
+  black:
+
+    runs-on: ubuntu-18.04
+
+    steps:
+    - uses: actions/checkout@v1
+    # we don't get submodules because we don't want to check them anyway
+    - name: Set up Python
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.7
+    - name: Install
+      run: |
+        python3 -m pip install --upgrade pip
+        pip3 install black
+    - name: Check code style with Black 
+      run: |
+        black --check --diff .

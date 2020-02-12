@@ -5,20 +5,18 @@ import _pypops as pypops
 
 
 def test_compatibility_of_used_scalar_type():
-    a = np.array([[5, 0, 0],
-                  [0, 0, 0]])
-    b = np.array([[0.6, 0.8, 0.7],
-                  [0.2, 0.8, 0.5]])
+    a = np.array([[5, 0, 0], [0, 0, 0]])
+    b = np.array([[0.6, 0.8, 0.7], [0.2, 0.8, 0.5]])
 
     tf = pypops.get_float_raster_scalar_type()
     print("Type:", tf)
-    pypops.test_compatibility_Float(np.array([[2,1,0], [4,6,7]], dtype=tf))
+    pypops.test_compatibility_Float(np.array([[2, 1, 0], [4, 6, 7]], dtype=tf))
 
     ti = pypops.get_integer_raster_scalar_type()
     print("Type:", ti)
-    pypops.test_compatibility_Integer(np.array([[2,1,0], [4,6,7]], dtype=ti))
+    pypops.test_compatibility_Integer(np.array([[2, 1, 0], [4, 6, 7]], dtype=ti))
 
-    #m = pypops.Matrix(b)
+    # m = pypops.Matrix(b)
     m = pypops.FloatRaster(b)
     print(m)
     print(b)
@@ -31,12 +29,16 @@ def test_compatibility_of_used_scalar_type():
 
 
 def test_compatibility_of_scalar_types():
-    pypops.test_compatibility_double(np.array([[2.2,1,0], [4,6,7]]))
-    pypops.test_compatibility_double(np.array([[2,1,0], [4,6,7]], dtype=np.float64))
-    pypops.test_compatibility_float(np.array([[2,1,0], [4,6,7]], dtype=np.float32))
-    pypops.test_compatibility_long_double(np.array([[2,1,0], [4,6,7]], dtype=np.float128))
-    pypops.test_compatibility_int32_t(np.array([[2,1,0], [4,6,7]], dtype=np.int32))
-    pypops.test_compatibility_long_long(np.array([[2,1,0], [4,6,7]], dtype=np.longlong))
+    pypops.test_compatibility_double(np.array([[2.2, 1, 0], [4, 6, 7]]))
+    pypops.test_compatibility_double(np.array([[2, 1, 0], [4, 6, 7]], dtype=np.float64))
+    pypops.test_compatibility_float(np.array([[2, 1, 0], [4, 6, 7]], dtype=np.float32))
+    pypops.test_compatibility_long_double(
+        np.array([[2, 1, 0], [4, 6, 7]], dtype=np.float128)
+    )
+    pypops.test_compatibility_int32_t(np.array([[2, 1, 0], [4, 6, 7]], dtype=np.int32))
+    pypops.test_compatibility_long_long(
+        np.array([[2, 1, 0], [4, 6, 7]], dtype=np.longlong)
+    )
 
     # pypops.test_compatibility_int(np.array([[2,1,0], [4,6,7]]))
     # pypops.test_compatibility_float(np.array([[2,1,0], [4,6,7]], dtype=np.int32))
