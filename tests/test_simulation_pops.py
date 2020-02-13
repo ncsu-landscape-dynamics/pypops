@@ -16,9 +16,7 @@ def test_simulation_function():
     total_plants = np.array([[15, 6, 20], [14, 15, 25]], dtype=int_type)
     total_plants_original = total_plants.copy()
     temperature = np.array([[5, 0, 5], [0, 0, 5]], dtype=float_type)
-    weather_coefficient = np.array(
-        [[0.6, 0.8, 0.7], [0.2, 0.8, 0.5]], dtype=float_type
-    )
+    weather_coefficient = np.array([[0.6, 0.8, 0.7], [0.2, 0.8, 0.5]], dtype=float_type)
 
     result = pops(
         random_seed=42,
