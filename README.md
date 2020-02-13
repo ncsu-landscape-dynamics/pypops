@@ -1,9 +1,10 @@
-# pypops
+# pypops - Interface to PoPS
 
-[![Python package test build](https://github.com/ncsu-landscape-dynamics/pypops/workflows/C%2B%2B%20CMake%20CI%20with%20Python/badge.svg)](https://github.com/ncsu-landscape-dynamics/pypops/actions?query=workflow%3A%22C%2B%2B+CMake+CI+with+Python%22)
-[![C++ CMake CI with Python](https://github.com/ncsu-landscape-dynamics/pypops/workflows/Python%20package%20test%20build/badge.svg)](https://github.com/ncsu-landscape-dynamics/pypops/actions?query=workflow%3A%22Python+package+test+build%22)
+[![Python package test build](https://github.com/ncsu-landscape-dynamics/pypops/workflows/Python%20package%20test%20build/badge.svg)](https://github.com/ncsu-landscape-dynamics/pypops/actions?query=workflow%3A%22Python+package+test+build%22)
+[![C++ CMake CI with Python](https://github.com/ncsu-landscape-dynamics/pypops/workflows/C%2B%2B%20CMake%20CI%20with%20Python/badge.svg)](https://github.com/ncsu-landscape-dynamics/pypops/actions?query=workflow%3A%22C%2B%2B+CMake+CI+with+Python%22)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-PoPS (Pest or Pathogen Spread) Model Python Interface
+This is a Python interface to the PoPS (Pest or Pathogen Spread) model.
 
 ## Install using pip
 
