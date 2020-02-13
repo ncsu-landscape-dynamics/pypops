@@ -1,4 +1,4 @@
-# pypops - Interface to PoPS
+# pypops - Python Interface to PoPS
 
 [![Python package test build](https://github.com/ncsu-landscape-dynamics/pypops/workflows/Python%20package%20test%20build/badge.svg)](https://github.com/ncsu-landscape-dynamics/pypops/actions?query=workflow%3A%22Python+package+test+build%22)
 [![C++ CMake CI with Python](https://github.com/ncsu-landscape-dynamics/pypops/workflows/C%2B%2B%20CMake%20CI%20with%20Python/badge.svg)](https://github.com/ncsu-landscape-dynamics/pypops/actions?query=workflow%3A%22C%2B%2B+CMake+CI+with+Python%22)
@@ -40,6 +40,8 @@ pip install git+https://github.com/ncsu-landscape-dynamics/pypops
 ```
 
 To install from previosly downloaded source code, just use path the source code instead of the URL.
+If you want to edit the source code and run without installing it, use *pip*
+with the `--editable` flag.
 
 ## Run tests using *pytest*
 
