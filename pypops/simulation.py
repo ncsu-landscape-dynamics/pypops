@@ -1,46 +1,61 @@
-import numpy as np
-
 import _pypops
 
 
-def pops():
-    int_type = _pypops.get_integer_raster_scalar_type()
-    float_type = _pypops.get_float_raster_scalar_type()
+int_type = _pypops.get_integer_raster_scalar_type()
+float_type = _pypops.get_float_raster_scalar_type()
 
-    infected = np.array([[5, 0, 0], [0, 0, 0]], dtype=np.int32)
-    mortality_tracker = np.array([[0, 0, 0], [0, 0, 0]], dtype=int_type)
-    # dispersers = np.matrix("0 0 0; 0 0 0", dtype=int_type)
-    susceptible = np.array([[10, 6, 20], [14, 15, 20]], dtype=int_type)
-    total_plants = np.array([[15, 6, 20], [14, 15, 25]], dtype=int_type)
-    temperature = np.array([[5, 0, 5], [0, 0, 5]], dtype=float_type)
-    weather_coefficient = np.array([[0.6, 0.8, 0.7], [0.2, 0.8, 0.5]], dtype=float_type)
 
-    a = _pypops.test_simulation(
-        random_seed=42,
-        steps=2,
-        use_lethal_temperature=False,
-        lethal_temperature=-1.5,
+def pops(
+    random_seed,
+    steps,
+    use_lethal_temperature=False,
+    lethal_temperature=None,
+    infected=None,
+    susceptible=None,
+    total_plants=None,
+    mortality_tracker=None,
+    # dispersers=dispersers,
+    weather=False,
+    temperature=None,
+    weather_coefficient=None,
+    ew_res=None,
+    ns_res=None,
+    reproductive_rate=None,
+    natural_kernel_type="cauchy",
+    natural_scale=20,
+    natural_direction="none",
+    natural_kappa=0,
+    use_anthropogenic_kernel=False,
+    percent_natural_dispersal=0,
+    anthro_kernel_type="cauchy",
+    anthro_scale=0,
+    anthro_direction="none",
+    anthro_kappa=0,
+):
+    result = _pypops.test_simulation(
+        random_seed=random_seed,
+        steps=steps,
+        use_lethal_temperature=use_lethal_temperature,
+        lethal_temperature=lethal_temperature,
         infected=infected,
         susceptible=susceptible,
         total_plants=total_plants,
         mortality_tracker=mortality_tracker,
-        # dispersers=dispersers,
-        weather=True,
-        temperature=[temperature, temperature],
-        weather_coefficient=[weather_coefficient, weather_coefficient],
-        # weather_coefficient=weather_coefficient,
-        ew_res=100.0,
-        ns_res=100.0,
-        reproductive_rate=400.4,
-        natural_kernel_type="cauchy",
-        natural_scale=20,
-        natural_direction="none",
-        natural_kappa=0,
-        use_anthropogenic_kernel=False,
-        percent_natural_dispersal=0,
-        anthro_kernel_type="cauchy",
-        anthro_scale=0,
-        anthro_direction="none",
-        anthro_kappa=0,
+        weather=weather,
+        temperature=temperature,
+        weather_coefficient=weather_coefficient,
+        ew_res=ew_res,
+        ns_res=ns_res,
+        reproductive_rate=reproductive_rate,
+        natural_kernel_type=natural_kernel_type,
+        natural_scale=natural_scale,
+        natural_direction=natural_direction,
+        natural_kappa=natural_kappa,
+        use_anthropogenic_kernel=use_anthropogenic_kernel,
+        percent_natural_dispersal=percent_natural_dispersal,
+        anthro_kernel_type=anthro_kernel_type,
+        anthro_scale=anthro_scale,
+        anthro_direction=anthro_direction,
+        anthro_kappa=anthro_kappa,
     )
-    return a
+    return result

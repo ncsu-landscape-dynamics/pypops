@@ -43,3 +43,6 @@ build
 *.files
 *.includes
 *.user
+
+# Packaging
+*.egg-info
