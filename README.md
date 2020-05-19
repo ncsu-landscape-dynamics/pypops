@@ -15,16 +15,10 @@ from the rest of your system. First, create the environment:
 python3 -m venv testvenv
 ```
 
-Enter the directory of virtual environment:
-
-```
-testvenv
-```
-
 Then, active the environment ([this will be different for different platfroms and shells](https://docs.python.org/3/library/venv.html)):
 
 ```
-source bin/activate
+source testvenv/bin/activate
 ```
 
 Before using *pip*, upgrate it:
