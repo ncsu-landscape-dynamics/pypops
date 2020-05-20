@@ -1,3 +1,17 @@
+# PoPS model Python API - Main simulation interface
+#
+# Authors: Vaclav Petras (wenzeslaus gmail com)
+#
+# Copyright (C) 2020 by the authors.
+#
+# The code contained herein is licensed under the GNU General Public
+# License version 2 or later. You may obtain a copy of the GNU General Public
+# License at the following location:
+# http://www.gnu.org/copyleft/gpl.html
+
+"""PyPoPS - Main simulation interface
+"""
+
 import _pypops
 
 
@@ -32,6 +46,8 @@ def pops(
     anthro_direction="none",
     anthro_kappa=0,
 ):
+    # pylint: disable=too-many-arguments,too-many-locals
+    """Run one PoPS simulation"""
     result = _pypops.test_simulation(
         random_seed=random_seed,
         steps=steps,
