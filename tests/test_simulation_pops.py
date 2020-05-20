@@ -11,7 +11,7 @@ def test_types_are_different():
 def test_simulation_function():
     infected = np.array([[5, 0, 0], [0, 0, 0]], dtype=int_type)
     mortality_tracker = np.array([[0, 0, 0], [0, 0, 0]], dtype=int_type)
-    # dispersers = np.matrix("0 0 0; 0 0 0", dtype=int_type)
+    # dispersers = np.array([[0, 0, 0], [0, 0, 0]], dtype=int_type)
     susceptible = np.array([[10, 6, 20], [14, 15, 20]], dtype=int_type)
     total_plants = np.array([[15, 6, 20], [14, 15, 25]], dtype=int_type)
     total_plants_original = total_plants.copy()

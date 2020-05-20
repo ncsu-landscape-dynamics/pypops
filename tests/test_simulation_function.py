@@ -10,7 +10,7 @@ def test_simulation_function():
 
     infected = np.array([[5, 0, 0], [0, 0, 0]], dtype=np.int32)
     mortality_tracker = np.array([[0, 0, 0], [0, 0, 0]], dtype=int_type)
-    # dispersers = np.matrix("0 0 0; 0 0 0", dtype=int_type)
+    # dispersers = np.array([[0, 0, 0], [0, 0, 0]], dtype=int_type)
     susceptible = np.array([[10, 6, 20], [14, 15, 20]], dtype=int_type)
     total_plants = np.array([[15, 6, 20], [14, 15, 25]], dtype=int_type)
     temperature = np.array([[5, 0, 5], [0, 0, 5]], dtype=float_type)
