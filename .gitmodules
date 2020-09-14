@@ -2,5 +2,5 @@
 	path = pybind11
 	url = https://github.com/pybind/pybind11.git
 [submodule "PoPS"]
-	path = PoPS
+	path = pops-core
 	url = https://github.com/ncsu-landscape-dynamics/PoPS.git
