@@ -1,0 +1,20 @@
+{
+  "random_seed": 42,
+  "steps": 2,
+  "use_lethal_temperature": false,
+  "lethal_temperature": -1.5,
+  "weather": true,
+  "ew_res": 100.0,
+  "ns_res": 100.0,
+  "reproductive_rate": 400.4,
+  "natural_kernel_type": "cauchy",
+  "natural_scale": 20,
+  "natural_direction": "none",
+  "natural_kappa": 0,
+  "use_anthropogenic_kernel": false,
+  "percent_natural_dispersal": 0,
+  "anthro_kernel_type": "cauchy",
+  "anthro_scale": 0,
+  "anthro_direction": "none",
+  "anthro_kappa": 0
+}
