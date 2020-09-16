@@ -84,5 +84,5 @@ setup(
     ext_modules=[CMakeExtension("_pypops")],
     cmdclass=dict(build_ext=CMakeBuild),
     zip_safe=False,
-    install_requires=["numpy",],
+    install_requires=["numpy"],
 )
