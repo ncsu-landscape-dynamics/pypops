@@ -3,6 +3,7 @@
 
 #include <pops/simulation.hpp>
 #include <pops/kernel.hpp>
+#include <pops/model.hpp>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -44,21 +45,23 @@ struct Result
     std::vector<std::tuple<int, int>> outside_dispersers;
 };
 
+
 // TODO: an output type seems to be reasonable
 // or a higher level object for the model/simulation
 // or the customizable output functions will take care of it by a custom
 // context which can be these vectors or write functions
 Result test_simulation(
         int random_seed,
-        int steps,
         bool use_lethal_temperature,
         double lethal_temperature,
         IntegerRaster infected,
         IntegerRaster susceptible,
+        std::vector<IntegerRaster> exposed,
         IntegerRaster total_plants,
-        IntegerRaster mortality_tracker,
+        std::vector<IntegerRaster> mortality_tracker,
+        IntegerRaster died,
         bool weather,
-        std::vector<FloatRaster> temperature,
+        std::vector<FloatRaster> temperatures,
         std::vector<FloatRaster> weather_coefficient,
         double ew_res,
         double ns_res,
@@ -76,44 +79,62 @@ Result test_simulation(
         )
 {
     IntegerRaster dispersers(infected.rows(), infected.cols(), 0);
+    IntegerRaster zeros(infected.rows(), infected.cols(), 0);
+    IntegerRaster resistant(infected.rows(), infected.cols(), 0);
+    IntegerRaster quarantine_areas(infected.rows(), infected.cols(), 0);
     std::vector<std::tuple<int, int>> outside_dispersers;
+    std::vector<std::vector<int>> movements;
 
-    DispersalKernelType natural_kernel = kernel_type_from_string(natural_kernel_type);
-    DispersalKernelType anthro_kernel = kernel_type_from_string(anthro_kernel_type);
+    Config config;
+    config.random_seed = random_seed;
+    // TODO: all time related here!
+    config.model_type = "SI";
+    config.use_lethal_temperature = use_lethal_temperature;
+    config.lethal_temperature = lethal_temperature;
+    config.weather = weather;
+    config.ew_res = ew_res;
+    config.ns_res = ns_res;
+    config.rows = infected.rows();
+    config.cols = infected.cols();
+    config.reproductive_rate = reproductive_rate;
+    config.natural_kernel_type = natural_kernel_type;
+    config.natural_scale = natural_scale;
+    config.natural_direction = natural_direction;
+    config.natural_kappa = natural_kappa;
+    config.use_anthropogenic_kernel = use_anthropogenic_kernel;
+    config.percent_natural_dispersal = percent_natural_dispersal;
+    config.anthro_kernel_type = anthro_kernel_type;
+    config.anthro_scale = anthro_scale;
+    config.anthro_direction = anthro_direction;
+    config.anthro_kappa = anthro_kappa;
 
-    RadialDispersalKernel natural_radial_kernel(
-                ew_res, ns_res,
-                natural_kernel,
-                natural_scale,
-                direction_from_string(natural_direction),
-                natural_kappa);
-    RadialDispersalKernel long_radial_kernel(
-                ew_res, ns_res,
-                anthro_kernel,
-                anthro_scale,
-                direction_from_string(anthro_direction),
-                anthro_kappa);
-    UniformDispersalKernel uniform_kernel(infected.rows(), infected.cols());
-    SwitchDispersalKernel natural_selectable_kernel(
-                natural_kernel,
-                natural_radial_kernel, uniform_kernel);
-    SwitchDispersalKernel anthro_selectable_kernel(
-                    anthro_kernel,
-                    long_radial_kernel, uniform_kernel);
-    DispersalKernel dispersal_kernel(natural_selectable_kernel,
-                                     anthro_selectable_kernel,
-                                     use_anthropogenic_kernel,
-                                     percent_natural_dispersal);
+    config.create_schedules();
 
-    Simulation<IntegerRaster, FloatRaster> simulation(random_seed, infected.rows(), infected.cols());
-    for (int step = 0; step < steps; ++step) {
-        if (use_lethal_temperature)
-            simulation.remove(infected, susceptible, temperature[step], lethal_temperature);
-        simulation.generate(dispersers, infected, weather, weather_coefficient[step], reproductive_rate);
-        simulation.disperse(dispersers, susceptible, infected,
-                            mortality_tracker, total_plants,
-                            outside_dispersers, weather, weather_coefficient[step],
-                            dispersal_kernel);
+    Treatments<IntegerRaster, FloatRaster> treatments(config.scheduler());
+    SpreadRate<IntegerRaster> spread_rate(
+        infected, config.ew_res, config.ns_res, config.rate_num_steps());
+    QuarantineEscape<IntegerRaster> quarantine(zeros, config.ew_res, config.ns_res, 0);
+
+    Model<IntegerRaster, FloatRaster, FloatRaster::IndexType> model(config);
+    for (unsigned step = 0; step < config.scheduler().get_num_steps(); ++step) {
+        model.run_step(
+                    step,
+                    infected,
+                    susceptible,
+                    total_plants,
+                    dispersers,
+                    exposed,
+                    mortality_tracker,
+                    died,
+                    temperatures,
+                    weather_coefficient[step],
+                    treatments,
+                    resistant,
+                    outside_dispersers,
+                    spread_rate,
+                    quarantine,
+                    quarantine_areas,
+                    movements);
     }
     return {outside_dispersers};
 }
@@ -124,13 +145,14 @@ Result test_simulation(
 // context which can be these vectors or write functions
 Result test_simulation_wrapper(
         int random_seed,
-        int steps,
         bool use_lethal_temperature,
         double lethal_temperature,
         py::buffer infected,
         py::buffer susceptible,
+        std::vector<py::buffer> exposed,
         py::buffer total_plants,
-        py::buffer mortality_tracker,
+        std::vector<py::buffer> mortality_tracker,
+        py::buffer died,
         bool weather,
         std::vector<py::buffer> temperature,
         std::vector<py::buffer> weather_coefficient,
@@ -151,13 +173,14 @@ Result test_simulation_wrapper(
 {
     return test_simulation(
                 random_seed,
-                steps,
                 use_lethal_temperature,
                 lethal_temperature,
                 py_buffer_info_to_raster<IntegerRaster>(infected),
                 py_buffer_info_to_raster<IntegerRaster>(susceptible),
+                py_buffers_info_to_rasters<IntegerRaster>(exposed),
                 py_buffer_info_to_raster<IntegerRaster>(total_plants),
-                py_buffer_info_to_raster<IntegerRaster>(mortality_tracker),
+                py_buffers_info_to_rasters<IntegerRaster>(mortality_tracker),
+                py_buffer_info_to_raster<IntegerRaster>(died),
                 weather,
                 py_buffers_info_to_rasters<FloatRaster>(temperature),
                 py_buffers_info_to_rasters<FloatRaster>(weather_coefficient),
@@ -247,24 +270,30 @@ PYBIND11_MODULE(_pypops, m) {
         }
     });
 
+//    pybind11::class_<Config>(m, "Config");
+//    pybind11::class_<Model>(m, "Model").
+//            .def_readwrite("random_seed", &Config::random_seed);
+
     py::class_<Result>(m, "Result")
              //.def_readonly("infected", &Result::infected)
              //.def_readonly("susceptible", &Result::susceptible)
              .def_readonly("outside_dispersers", &Result::outside_dispersers)
             ;
 
+
     // Tip: if you get "number of annotations does not match"
     // but parameters seems to be right, check the commas.
     m.def("test_simulation",
           &test_simulation_wrapper,
           "random_seed"_a,
-          "steps"_a,
           "use_lethal_temperature"_a,
           "lethal_temperature"_a,
           "infected"_a,
           "susceptible"_a,
+          "exposed"_a,
           "total_plants"_a,
           "mortality_tracker"_a,
+          "died"_a,
           "weather"_a,
           "temperature"_a,
           "weather_coefficient"_a,
