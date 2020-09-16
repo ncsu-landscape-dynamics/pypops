@@ -18,7 +18,8 @@ def test_simulation_function():
     weather_coefficient = np.array([[0.6, 0.8, 0.7], [0.2, 0.8, 0.5]], dtype=float_type)
 
     latency_period_steps = 0
-    exposed = [np.array([[0, 0, 0], [0, 0, 0]], dtype=int_type)] * (latency_period_steps + 1)
+    exposed_size = latency_period_steps + 1
+    exposed = [np.array([[0, 0, 0], [0, 0, 0]], dtype=int_type)] * exposed_size
 
     a = pypops.test_simulation(
         random_seed=42,
