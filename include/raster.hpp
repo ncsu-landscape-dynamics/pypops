@@ -67,7 +67,8 @@ RasterType py_buffer_info_to_raster(pybind11::buffer b)
 // TODO: The return from function does not work, so unused for now.
 // Perhaps a 3D array will be needed for interface anyway.
 template<typename RasterType>
-std::vector<RasterType> py_buffers_info_to_rasters(std::vector<pybind11::buffer>& buffers)
+std::vector<RasterType>
+py_buffers_info_to_rasters(std::vector<pybind11::buffer>& buffers)
 {
     std::vector<RasterType> rasters;
     rasters.reserve(buffers.size());
@@ -93,33 +94,29 @@ pybind11::buffer_info raster_to_py_buffer_info(RasterType& raster)
         // Buffer dimensions
         {raster.rows(), raster.cols()},
         // Strides (in bytes) for each index, row-major order
-        {sizeof(NumberType) * raster.cols(),
-         sizeof(NumberType) * 1}
-    );
+        {sizeof(NumberType) * raster.cols(), sizeof(NumberType) * 1});
 }
 
 // We use template parameter instead of py::module to avoid this
 // implementation detail by duck typing.
 template<typename RasterType, typename PythonModule>
-void raster_class(PythonModule& m, const std::string& name) {
+void raster_class(PythonModule& m, const std::string& name)
+{
     pybind11::class_<RasterType>(m, name.c_str(), pybind11::buffer_protocol())
-            .def(pybind11::init([](pybind11::buffer b) {
-                     return py_buffer_info_to_raster<RasterType>(b);
-                     // return by raw pointer
-                     // or: return std::make_unique<Foo>(...); // return by holder
-                     // or: return Foo(...); // return by value (move constructor)
-                 }))
+        .def(pybind11::init([](pybind11::buffer b) {
+            return py_buffer_info_to_raster<RasterType>(b);
+            // return by raw pointer
+            // or: return std::make_unique<Foo>(...); // return by holder
+            // or: return Foo(...); // return by value (move constructor)
+        }))
 
-            .def_buffer(
-                raster_to_py_buffer_info<RasterType>
-                );
+        .def_buffer(raster_to_py_buffer_info<RasterType>);
 }
 
 template<typename NumberType, typename PythonModule>
 void test_compatibility(PythonModule m, std::string name)
 {
-    m.def(name.c_str(),
-          [](pybind11::buffer b) {
+    m.def(name.c_str(), [](pybind11::buffer b) {
         pybind11::buffer_info info = b.request();
         raster_compatible_or_throw<NumberType>(info);
     });
@@ -131,17 +128,16 @@ pybind11::object get_float_raster_scalar_type()
     // https://docs.scipy.org/doc/numpy/user/basics.types.html
     pybind11::object dtype = np.attr("dtype");
     std::vector<pybind11::object> candidates = {
-//        numpy.attr("double").attr("itemsize"),
-//        numpy.attr("single"),
-//        numpy.attr("longdouble"),
-//        numpy.attr("float16"),
-//        numpy.attr("half")
+        //        numpy.attr("double").attr("itemsize"),
+        //        numpy.attr("single"),
+        //        numpy.attr("longdouble"),
+        //        numpy.attr("float16"),
+        //        numpy.attr("half")
         dtype("float64"),
         dtype("float32"),
         dtype("double"),
         dtype("single"),
-        dtype("longdouble")
-    };
+        dtype("longdouble")};
     for (const auto candidate : candidates) {
         if (sizeof(Float) == pybind11::int_(candidate.attr("itemsize")))
             return candidate;
@@ -166,4 +162,4 @@ pybind11::object get_integer_raster_scalar_type()
     throw std::logic_error("Cannot find a compatible scalar type");
 }
 
-#endif // RASTER_HPP
+#endif  // RASTER_HPP

@@ -1,3 +1,5 @@
+# Only tests of C++ code are handled here (_pypops not pypops).
+
 find_package(Python3 COMPONENTS Interpreter)
 
 add_test(NAME test_new_and_modify_array

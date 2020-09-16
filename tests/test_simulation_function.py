@@ -10,21 +10,27 @@ def test_simulation_function():
 
     infected = np.array([[5, 0, 0], [0, 0, 0]], dtype=np.int32)
     mortality_tracker = np.array([[0, 0, 0], [0, 0, 0]], dtype=int_type)
+    died = np.array([[0, 0, 0], [0, 0, 0]], dtype=int_type)
     # dispersers = np.array([[0, 0, 0], [0, 0, 0]], dtype=int_type)
     susceptible = np.array([[10, 6, 20], [14, 15, 20]], dtype=int_type)
     total_plants = np.array([[15, 6, 20], [14, 15, 25]], dtype=int_type)
     temperature = np.array([[5, 0, 5], [0, 0, 5]], dtype=float_type)
     weather_coefficient = np.array([[0.6, 0.8, 0.7], [0.2, 0.8, 0.5]], dtype=float_type)
 
+    latency_period_steps = 0
+    exposed_size = latency_period_steps + 1
+    exposed = [np.array([[0, 0, 0], [0, 0, 0]], dtype=int_type)] * exposed_size
+
     a = pypops.test_simulation(
         random_seed=42,
-        steps=2,
         use_lethal_temperature=False,
         lethal_temperature=-1.5,
         infected=infected,
         susceptible=susceptible,
+        exposed=exposed,
         total_plants=total_plants,
-        mortality_tracker=mortality_tracker,
+        mortality_tracker=[mortality_tracker, mortality_tracker],
+        died=died,
         # dispersers=dispersers,
         weather=True,
         temperature=[temperature, temperature],

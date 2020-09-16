@@ -10,7 +10,7 @@ project(PyPoPS
 #include_directories("${PROJECT_SOURCE_DIR}/")
 
 add_subdirectory(pybind11)
-add_subdirectory(PoPS)
+add_subdirectory(pops-core)
 
 pybind11_add_module(_pypops src/pypops.cpp include/raster.hpp include/helpers.hpp)
 

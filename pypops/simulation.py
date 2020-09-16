@@ -12,22 +12,36 @@
 """PyPoPS - Main simulation interface
 """
 
+import json
+
 import _pypops
+from _pypops import Config
 
 
 int_type = _pypops.get_integer_raster_scalar_type()
 float_type = _pypops.get_float_raster_scalar_type()
 
 
+def json_to_config(config):
+    """Run one PoPS simulation"""
+    with open(config) as config_file:
+        config_values = json.load(config_file)
+    result = Config()
+    for key, value in config_values.items():
+        setattr(result, key, value)
+    return result
+
+
 def pops(
     random_seed,
-    steps,
     use_lethal_temperature=False,
     lethal_temperature=None,
     infected=None,
     susceptible=None,
+    exposed=None,
     total_plants=None,
     mortality_tracker=None,
+    died=None,
     # dispersers=dispersers,
     weather=False,
     temperature=None,
@@ -50,13 +64,14 @@ def pops(
     """Run one PoPS simulation"""
     result = _pypops.test_simulation(
         random_seed=random_seed,
-        steps=steps,
         use_lethal_temperature=use_lethal_temperature,
         lethal_temperature=lethal_temperature,
         infected=infected,
         susceptible=susceptible,
+        exposed=exposed,
         total_plants=total_plants,
         mortality_tracker=mortality_tracker,
+        died=died,
         weather=weather,
         temperature=temperature,
         weather_coefficient=weather_coefficient,
