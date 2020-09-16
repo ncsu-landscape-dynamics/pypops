@@ -21,13 +21,14 @@ float_type = _pypops.get_float_raster_scalar_type()
 
 def pops(
     random_seed,
-    steps,
     use_lethal_temperature=False,
     lethal_temperature=None,
     infected=None,
     susceptible=None,
+    exposed=None,
     total_plants=None,
     mortality_tracker=None,
+    died=None,
     # dispersers=dispersers,
     weather=False,
     temperature=None,
@@ -50,13 +51,14 @@ def pops(
     """Run one PoPS simulation"""
     result = _pypops.test_simulation(
         random_seed=random_seed,
-        steps=steps,
         use_lethal_temperature=use_lethal_temperature,
         lethal_temperature=lethal_temperature,
         infected=infected,
         susceptible=susceptible,
+        exposed=exposed,
         total_plants=total_plants,
         mortality_tracker=mortality_tracker,
+        died=died,
         weather=weather,
         temperature=temperature,
         weather_coefficient=weather_coefficient,
