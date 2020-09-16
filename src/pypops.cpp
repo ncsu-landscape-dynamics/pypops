@@ -274,7 +274,27 @@ PYBIND11_MODULE(_pypops, m)
         }
     });
 
-    //    pybind11::class_<Config>(m, "Config");
+    py::class_<Config>(m, "Config")
+        .def(py::init<>())
+        .def_readwrite("random_seed", &Config::random_seed)
+        .def_readwrite("rows", &Config::rows)
+        .def_readwrite("cols", &Config::cols)
+        .def_readwrite("ew_res", &Config::ew_res)
+        .def_readwrite("ns_res", &Config::ns_res)
+        .def_readwrite("use_lethal_temperature", &Config::use_lethal_temperature)
+        .def_readwrite("lethal_temperature", &Config::lethal_temperature)
+        .def_readwrite("weather", &Config::weather)
+        .def_readwrite("reproductive_rate", &Config::reproductive_rate)
+        .def_readwrite("natural_kernel_type", &Config::natural_kernel_type)
+        .def_readwrite("natural_scale", &Config::natural_scale)
+        .def_readwrite("natural_direction", &Config::natural_direction)
+        .def_readwrite("natural_kappa", &Config::natural_kappa)
+        .def_readwrite("use_anthropogenic_kernel", &Config::use_anthropogenic_kernel)
+        .def_readwrite("percent_natural_dispersal", &Config::percent_natural_dispersal)
+        .def_readwrite("anthro_kernel_type", &Config::anthro_kernel_type)
+        .def_readwrite("anthro_scale", &Config::anthro_scale)
+        .def_readwrite("anthro_direction", &Config::anthro_direction)
+        .def_readwrite("anthro_kappa", &Config::anthro_kappa);
     //    pybind11::class_<Model>(m, "Model").
     //            .def_readwrite("random_seed", &Config::random_seed);
 

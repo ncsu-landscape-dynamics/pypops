@@ -12,11 +12,24 @@
 """PyPoPS - Main simulation interface
 """
 
+import json
+
 import _pypops
+from _pypops import Config
 
 
 int_type = _pypops.get_integer_raster_scalar_type()
 float_type = _pypops.get_float_raster_scalar_type()
+
+
+def json_to_config(config):
+    """Run one PoPS simulation"""
+    with open(config) as config_file:
+        config_values = json.load(config_file)
+    result = Config()
+    for key, value in config_values.items():
+        setattr(result, key, value)
+    return result
 
 
 def pops(
